@@ -3,6 +3,7 @@
 Zero-touch firmware and content manager for your Portapack Mayhem device.
 
 ## Features
+https://docs.google.com/spreadsheets/d/1kAV4WlPuH78gaNeH_YFRwC70XtRqaMzNakt0ZiS8IYk/edit?usp=sharing
 
 - **Latest Mayhem firmware** - Auto-fetches stable or nightly builds from GitHub
 - **Nightly builds** - Get bleeding-edge features with `--nightly`
