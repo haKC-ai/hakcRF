@@ -1,0 +1,60 @@
+App Name,Category,Direction,Frequency Range,Description,Legal Status
+ADS-B RX,Receive,RX Only,1090 MHz,Track aircraft via ADS-B transponders,Legal (receive)
+ADS-B TX,Transmit,TX Only,1090 MHz,Simulate ADS-B aircraft signals,ILLEGAL - Federal crime
+AIS,Receive,RX Only,161.975/162.025 MHz,Track ships and boats via AIS,Legal (receive)
+Analog TV,Receive,RX Only,VHF/UHF,Receive analog TV broadcasts,Legal (receive)
+APRS RX,Receive,RX Only,144.39 MHz (US),Receive amateur packet radio,Legal (receive)
+APRS TX,Transmit,TX Only,144.39 MHz (US),Transmit APRS packets,Requires ham license
+Audio RX,Receive,RX Only,1 MHz - 6 GHz,General audio receiver (AM/NFM/WFM),Legal (receive)
+BLE RX,Receive,RX Only,2.4 GHz,Scan Bluetooth Low Energy advertisements,Legal (receive)
+BLE TX,Transmit,TX Only,2.4 GHz,Transmit BLE advertisements,Legal (low power)
+BLE Spam,Transmit,TX Only,2.4 GHz,Spam BLE pairing requests (iOS/Android),Gray area - annoying
+Capture,Utility,RX Only,1 MHz - 6 GHz,Record raw IQ signals to SD card,Legal (receive)
+Replay,Transmit,TX Only,1 MHz - 6 GHz,Replay captured signals,Depends on target
+ERT Meter,Receive,RX Only,912-920 MHz,Decode electric/gas/water meter data,Legal (receive)
+FM Radio,Receive,RX Only,87.5-108 MHz,Standard FM broadcast radio,Legal (receive)
+Frequency Manager,Utility,N/A,N/A,Manage saved frequencies,N/A
+GPS Sim,Transmit,TX Only,1575.42 MHz,Simulate GPS satellites,ILLEGAL - Federal crime
+Jammer,Transmit,TX Only,Configurable,Broadband jamming,ILLEGAL - Federal crime
+Level,Utility,RX Only,1 MHz - 6 GHz,Signal strength meter,Legal
+Looking Glass,Receive,RX Only,1 MHz - 6 GHz,Wideband spectrum analyzer,Legal (receive)
+Mic TX,Transceiver,TX/RX,Configurable,Two-way voice communication,Requires license on most freqs
+Morse TX,Transmit,TX Only,Configurable,Transmit Morse code,Requires license on most freqs
+NRF,Receive,RX Only,2.4 GHz,Decode Nordic RF protocols,Legal (receive)
+OOK TX,Transmit,TX Only,Sub-GHz,On-Off Keying transmission,Depends on target
+OOK Editor,Utility,N/A,N/A,Edit OOK signal files,N/A
+POCSAG RX,Receive,RX Only,Various,Decode pager messages,Legal (receive)
+POCSAG TX,Transmit,TX Only,Various,Transmit pager messages,ILLEGAL without license
+ProtoView,Receive,RX Only,Sub-GHz,Generic protocol analyzer,Legal (receive)
+Radiosondes,Receive,RX Only,400-406 MHz,Track weather balloons,Legal (receive)
+RDS TX,Transmit,TX Only,87.5-108 MHz,Transmit FM with RDS data,ILLEGAL (broadcast band)
+Recon,Receive,RX Only,1 MHz - 6 GHz,Automated signal hunting,Legal (receive)
+Remote,Utility,TX,Sub-GHz,IR/RF remote control,Legal (your devices)
+Scanner,Receive,RX Only,1 MHz - 6 GHz,Scan frequency ranges for activity,Legal (receive)
+Search,Receive,RX Only,1 MHz - 6 GHz,Search for specific signals,Legal (receive)
+Signal Gen,Utility,TX Only,1 MHz - 6 GHz,Generate test signals,Legal (shielded/low power)
+Soundboard,Transmit,TX Only,Configurable,Transmit audio samples,Depends on frequency
+Spectrum,Receive,RX Only,1 MHz - 6 GHz,Spectrum analyzer waterfall,Legal (receive)
+SSTV TX,Transmit,TX Only,Configurable,Slow-scan TV transmission,Requires ham license
+SubGhz RX,Receive,RX Only,300-928 MHz,Decode sub-GHz protocols (Flipper compatible),Legal (receive)
+TPMS,Receive,RX Only,315/433 MHz,Decode tire pressure sensors,Legal (receive)
+TouchTunes,Transmit,TX Only,433 MHz,Control TouchTunes jukeboxes,Gray area
+Wardrive,Utility,RX Only,WiFi bands,Map wireless networks,Legal (passive)
+Weather,Receive,RX Only,Various,Decode weather stations,Legal (receive)
+WeatherFax,Receive,RX Only,HF,Receive HF weather fax,Legal (receive)
+NOAA APT,Receive,RX Only,137 MHz,Receive NOAA satellite images,Legal (receive)
+Fox Hunt,Receive,RX Only,Configurable,Radio direction finding,Legal (ham activity)
+Calculator,Utility,N/A,N/A,Basic calculator,N/A
+Notepad,Utility,N/A,N/A,Text editor,N/A
+File Manager,Utility,N/A,N/A,Browse SD card files,N/A
+Doom,Game,N/A,N/A,Classic FPS game,N/A
+Snake,Game,N/A,N/A,Snake game,N/A
+Tetris,Game,N/A,N/A,Tetris game,N/A
+Pac-Man,Game,N/A,N/A,Pac-Man clone,N/A
+Breakout,Game,N/A,N/A,Breakout clone,N/A
+Morse Practice,Utility,N/A,N/A,Learn Morse code,N/A
+WhipCalc,Utility,N/A,N/A,Calculate antenna lengths,N/A
+Flash Utility,Utility,N/A,N/A,Flash HackRF firmware,N/A
+IQ Trim,Utility,N/A,N/A,Edit captured IQ files,N/A
+SD Over USB,Utility,N/A,N/A,Access SD card from computer,N/A
+Playlist,Utility,N/A,N/A,Manage playlists,N/A
