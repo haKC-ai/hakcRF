@@ -4,10 +4,11 @@ Zero-touch firmware and content manager for your Portapack Mayhem device.
 
 ## Features
 
-- **Latest Mayhem firmware** - Auto-fetches from GitHub releases
+- **Latest Mayhem firmware** - Auto-fetches stable or nightly builds from GitHub
+- **Nightly builds** - Get bleeding-edge features with `--nightly`
 - **World map data** - Full GPS/map support (or skip with `--no-world-map`)
 - **Frequency databases** - Generic + country-specific files from the community
-- **Theme resources** - Complete pp_res folder
+- **Sample files & presets** - LED samples, OOK files, remotes, etc.
 - **ADSB/AIS databases** - Aviation and maritime tracking data
 - **User data preservation** - Never touches your captures, recordings, or custom files
 - **Backup support** - Optional backup before updates
@@ -29,15 +30,20 @@ python3 hakcRF.py
 
 ## Usage
 
-### Install Everything (Default)
+### Install Everything (Stable)
 ```bash
 python3 hakcRF.py
 ```
 Downloads and installs:
-- Latest Mayhem firmware with world map (~570MB)
-- All theme resources
+- Latest stable Mayhem firmware with world map (~570MB)
+- All SD card resources (samples, presets, databases)
 - Frequency databases for all countries
-- ADSB/AIS/HackRF data
+
+### Install Nightly Build
+```bash
+python3 hakcRF.py --nightly
+```
+Installs the latest nightly build with bleeding-edge features and bug fixes.
 
 ### Smaller Install (No World Map)
 ```bash
@@ -63,12 +69,6 @@ python3 hakcRF.py --freq-only --countries USA Australia France
 ```
 Available countries: Australia, Belgium, France, India, Norway, Poland, Romanian, Slovakia, Sweden, USA, WorldWide
 
-### Themes Only
-```bash
-python3 hakcRF.py --themes-only
-```
-Only refresh the pp_res themes folder (uses smaller download).
-
 ### Create Backup First
 ```bash
 python3 hakcRF.py --backup
@@ -79,7 +79,12 @@ Backs up your captures, recordings, screenshots, and freqman files to Desktop be
 ```bash
 python3 hakcRF.py --check
 ```
-Shows latest available version vs. your last installed version.
+Shows latest stable and nightly versions vs. your last installed version.
+
+```bash
+python3 hakcRF.py --check --nightly
+```
+Check specifically for nightly updates.
 
 ### Verbose Mode
 ```bash
@@ -91,13 +96,18 @@ Enable detailed logging output.
 
 | Folder | Contents |
 |--------|----------|
-| `firmware/` | Mayhem firmware binaries |
-| `pp_res/` | Themes, fonts, UI resources |
+| `FIRMWARE/` | Mayhem firmware binaries (.bin, .ppfw.tar) |
 | `ADSB/` | Aircraft database |
 | `AIS/` | Maritime vessel database |
-| `hackrf/` | HackRF firmware |
-| `FREQMAN/` | Frequency manager presets |
 | `APPS/` | External applications |
+| `FREQMAN/` | Frequency manager presets |
+| `GPS/` | GPS data files |
+| `OSM/` | OpenStreetMap data (world map) |
+| `SAMPLES/` | LED, RF sample files |
+| `REMOTES/` | IR/RF remote codes |
+| `SPLASH/` | Boot splash screens |
+| `MACADDRESS/` | MAC address lookup database |
+| ...and more | BLETX, SSTV, SUBGHZ, WAV, etc. |
 
 ## What's Preserved
 

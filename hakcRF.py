@@ -32,6 +32,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 # CONFIGURATION
 # ---------------------------------------------------------
 MAYHEM_RELEASES_API = "https://api.github.com/repos/portapack-mayhem/mayhem-firmware/releases/latest"
+MAYHEM_ALL_RELEASES_API = "https://api.github.com/repos/portapack-mayhem/mayhem-firmware/releases"
 FREQMAN_API = "https://api.github.com/repos/portapack-mayhem/mayhem-freqman-files/contents"
 FREQMAN_RAW_BASE = "https://raw.githubusercontent.com/portapack-mayhem/mayhem-freqman-files/main"
 
@@ -41,9 +42,15 @@ LOG_FILE = Path(__file__).parent / "portapack_updater.log"
 STATE_FILE = Path(__file__).parent / ".updater_state.json"
 
 # System folders to wipe during clean install (preserves user data)
-SYSTEM_FOLDERS = ["pp_res", "firmware", "ADSB", "AIS", "hackrf", "APPS"]
+# These are all replaced by the firmware package
+SYSTEM_FOLDERS = [
+    "ADSB", "AIS", "APPS", "BLETX", "CVSFILES", "FIRMWARE", "GPS",
+    "HOPPER", "LOOKINGGLASS", "MACADDRESS", "OOKFILES", "OSM",
+    "PLAYLIST", "REMOTES", "SAMPLES", "SPLASH", "SSTV", "SUBGHZ",
+    "WATERFALLS", "WAV", "WHIPCALC"
+]
 
-# User folders to NEVER delete
+# User folders to NEVER delete (your personal data)
 USER_FOLDERS = ["CAPTURES", "RECORDINGS", "SCREENSHOTS", "LOGS", "DEBUG", "FREQMAN"]
 
 # Minimum required space in MB
@@ -226,9 +233,30 @@ def download_with_progress(url: str, dest_path: str, desc: str = "Downloading") 
         logging.error(f"Download failed: {e}")
         return False
 
-def fetch_github_release() -> Optional[Dict[str, Any]]:
-    """Fetch latest release info from GitHub"""
+def fetch_github_release(nightly: bool = False) -> Optional[Dict[str, Any]]:
+    """Fetch latest release info from GitHub
+
+    Args:
+        nightly: If True, fetch the latest nightly build instead of stable release
+    """
     try:
+        if nightly:
+            # Fetch all releases and find the latest nightly
+            response = requests.get(MAYHEM_ALL_RELEASES_API, timeout=15, params={'per_page': 30})
+            response.raise_for_status()
+            releases = response.json()
+
+            # Find the most recent nightly release
+            for release in releases:
+                tag = release.get('tag_name', '')
+                if tag.startswith('nightly-tag-'):
+                    logging.info(f"Found nightly release: {tag}")
+                    return release
+
+            logging.warning("No nightly release found, falling back to stable")
+            # Fall through to stable release
+
+        # Fetch latest stable release
         response = requests.get(MAYHEM_RELEASES_API, timeout=15)
         response.raise_for_status()
         return response.json()
@@ -239,11 +267,17 @@ def fetch_github_release() -> Optional[Dict[str, Any]]:
 # ---------------------------------------------------------
 # FIRMWARE INSTALLATION
 # ---------------------------------------------------------
-def install_firmware(include_world_map: bool = True):
-    """Download and install the latest Mayhem firmware"""
-    print_status("Fetching latest Mayhem firmware release...", "progress")
+def install_firmware(include_world_map: bool = True, nightly: bool = False):
+    """Download and install the latest Mayhem firmware
 
-    release = fetch_github_release()
+    Args:
+        include_world_map: Include world map data (larger download)
+        nightly: Use nightly build instead of stable release
+    """
+    build_type = "nightly" if nightly else "stable"
+    print_status(f"Fetching latest Mayhem {build_type} release...", "progress")
+
+    release = fetch_github_release(nightly=nightly)
     if not release:
         print_status("Failed to fetch release info from GitHub", "error")
         return False
@@ -404,10 +438,11 @@ def install_frequency_databases(countries: Optional[List[str]] = None):
 # ---------------------------------------------------------
 # COMPREHENSIVE INSTALL
 # ---------------------------------------------------------
-def install_everything(include_world_map: bool = True, freq_countries: Optional[List[str]] = None, backup: bool = False):
+def install_everything(include_world_map: bool = True, freq_countries: Optional[List[str]] = None, backup: bool = False, nightly: bool = False):
     """Perform a complete installation of all available content"""
     print_banner()
-    logging.info("Starting comprehensive installation")
+    build_type = "nightly" if nightly else "stable"
+    logging.info(f"Starting comprehensive installation ({build_type})")
 
     # 1. Check SD card
     if not find_sd_card():
@@ -425,9 +460,9 @@ def install_everything(include_world_map: bool = True, freq_countries: Optional[
     if backup:
         create_backup()
 
-    # 4. Install firmware (includes themes in pp_res)
-    print(f"\n{Colors.BOLD}═══ FIRMWARE & THEMES ═══{Colors.RESET}")
-    if not install_firmware(include_world_map):
+    # 4. Install firmware
+    print(f"\n{Colors.BOLD}═══ FIRMWARE ({build_type.upper()}) ═══{Colors.RESET}")
+    if not install_firmware(include_world_map, nightly=nightly):
         print_status("Firmware installation failed", "error")
         return False
 
@@ -448,11 +483,11 @@ def install_everything(include_world_map: bool = True, freq_countries: Optional[
 
 {Colors.BOLD}What was installed:{Colors.RESET}
   ✓ Latest Mayhem firmware
-  ✓ Theme resources (pp_res)
   ✓ World map data{"" if include_world_map else " (SKIPPED)"}
   ✓ ADSB & AIS databases
+  ✓ Sample files & presets
   ✓ Frequency manager files
-  ✓ HackRF firmware
+  ✓ All SD card resources
 
 {Colors.BOLD}Next steps:{Colors.RESET}
   1. {Colors.YELLOW}Wait 30 seconds{Colors.RESET} for write buffers to flush
@@ -475,7 +510,8 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                      Install everything with defaults
+  %(prog)s                      Install everything (stable release)
+  %(prog)s --nightly            Install latest nightly build
   %(prog)s --no-world-map       Install without world map (smaller download)
   %(prog)s --firmware-only      Only update firmware
   %(prog)s --freq-only          Only update frequency databases
@@ -483,17 +519,18 @@ Examples:
                                 Install specific country frequencies
   %(prog)s --backup             Create backup before installing
   %(prog)s --check              Check for updates without installing
+  %(prog)s --check --nightly    Check for nightly updates
         """
     )
 
+    parser.add_argument('--nightly', action='store_true',
+                        help="Use nightly build instead of stable release")
     parser.add_argument('--no-world-map', action='store_true',
                         help="Download smaller firmware without world map")
     parser.add_argument('--firmware-only', action='store_true',
                         help="Only install firmware (skip frequencies)")
     parser.add_argument('--freq-only', action='store_true',
                         help="Only install frequency databases")
-    parser.add_argument('--themes-only', action='store_true',
-                        help="Only refresh pp_res themes folder")
     parser.add_argument('--countries', nargs='+',
                         choices=FREQ_COUNTRIES,
                         help="Specific countries for frequency files")
@@ -510,17 +547,27 @@ Examples:
     # Check mode - just show status
     if args.check:
         print_banner()
-        release = fetch_github_release()
+        build_type = "nightly" if args.nightly else "stable"
+        print_status(f"Checking {build_type} releases...", "progress")
+
+        release = fetch_github_release(nightly=args.nightly)
         if release:
             version = release.get('tag_name', 'Unknown')
             state = load_state()
             current = state.get('last_firmware_version', 'None')
-            print_status(f"Latest available: {Colors.GREEN}{version}{Colors.RESET}", "info")
+            print_status(f"Latest {build_type}: {Colors.GREEN}{version}{Colors.RESET}", "info")
             print_status(f"Last installed: {Colors.YELLOW}{current}{Colors.RESET}", "info")
             if current != version:
                 print_status("Update available!", "success")
             else:
                 print_status("You're up to date", "success")
+
+            # Also show latest nightly if checking stable
+            if not args.nightly:
+                nightly_release = fetch_github_release(nightly=True)
+                if nightly_release:
+                    nightly_version = nightly_release.get('tag_name', 'Unknown')
+                    print_status(f"Latest nightly: {Colors.CYAN}{nightly_version}{Colors.RESET}", "info")
         return
 
     # Firmware only
@@ -531,7 +578,7 @@ Examples:
             sys.exit(1)
         if args.backup:
             create_backup()
-        success = install_firmware(not args.no_world_map)
+        success = install_firmware(not args.no_world_map, nightly=args.nightly)
         sys.exit(0 if success else 1)
 
     # Frequencies only
@@ -543,60 +590,12 @@ Examples:
         success = install_frequency_databases(args.countries)
         sys.exit(0 if success else 1)
 
-    # Themes only (just pp_res from firmware)
-    if args.themes_only:
-        print_banner()
-        if not find_sd_card():
-            print_status(f"SD Card '{SD_CARD_NAME}' not found", "error")
-            sys.exit(1)
-
-        print_status("Refreshing themes (pp_res)...", "progress")
-
-        release = fetch_github_release()
-        if not release:
-            print_status("Failed to fetch release", "error")
-            sys.exit(1)
-
-        # Find asset
-        assets = release.get('assets', [])
-        target = None
-        for asset in assets:
-            if "COPY_TO_SDCARD" in asset['name'] and "no-world-map" in asset['name']:
-                target = asset  # Use smaller no-map version for themes
-                break
-
-        if not target:
-            print_status("Could not find firmware asset", "error")
-            sys.exit(1)
-
-        print_status("Downloading and extracting themes...", "progress")
-        try:
-            with requests.get(target['browser_download_url'], stream=True, timeout=120) as r:
-                r.raise_for_status()
-                with zipfile.ZipFile(io.BytesIO(r.content)) as z:
-                    # Only extract pp_res
-                    theme_files = [f for f in z.namelist() if f.startswith("pp_res/")]
-
-                    # Remove old themes
-                    pp_res_path = os.path.join(MOUNT_POINT, "pp_res")
-                    if os.path.exists(pp_res_path):
-                        shutil.rmtree(pp_res_path)
-
-                    for member in theme_files:
-                        z.extract(member, MOUNT_POINT)
-
-                    print_status(f"Extracted {len(theme_files)} theme files", "success")
-        except Exception as e:
-            print_status(f"Failed: {e}", "error")
-            sys.exit(1)
-
-        sys.exit(0)
-
     # Default: install everything
     success = install_everything(
         include_world_map=not args.no_world_map,
         freq_countries=args.countries,
-        backup=args.backup
+        backup=args.backup,
+        nightly=args.nightly
     )
     sys.exit(0 if success else 1)
 
